@@ -1,103 +1,324 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useRef, useState } from "react";
+
+// supabaseから単語を取得
+/**
+ * APIからランダムな単語のリストを取得します。
+ * @async
+ * @param {string} level - 難易度 (easy, normal, hard)
+ * @returns {Promise<string[]>} 取得した単語の配列を返すPromise。
+ */
+const getRandomWord = async (level: string) => {
+  const response = await fetch(`/api/words?level=${level}`);
+  const data = await response.json();
+  return data.words;
+};
+
+/**
+ * タイピングゲームのメインコンポーネントです。
+ * ゲームの状態管理、ラウンドの進行、UIのレンダリングを行います。
+ */
+const TypingGamePage = () => {
+  // 現在表示されている単語を保持するステート
+  const [currentWord, setCurrentWord] = useState("");
+  // ユーザーが入力した値を保持するステート
+  const [inputValue, setInputValue] = useState("");
+  // ユーザーのスコアを保持するステート
+  const [score, setScore] = useState(0);
+  // 現在のラウンド数を保持するステート
+  const [round, setRound] = useState(0);
+  // ゲームがアクティブ（進行中）かどうかを管理するステート
+  const [isGameActive, setIsGameActive] = useState(false);
+  // 単語が表示されているかどうかを管理するステート
+  const [showWord, setShowWord] = useState(false);
+  // ゲームの結果メッセージ（例: Correct!, Wrong!）を保持するステート
+  const [resultMessage, setResultMessage] = useState("");
+  // APIから取得した単語のリストを保持するステート
+  const [wordList, setWordList] = useState<string[]>([]);
+  // 現在のラウンドが終了したかどうかを管理するステート
+  const [isRoundOver, setIsRoundOver] = useState(false);
+  // 難易度（easy, normal, hard）を管理するステート
+  const [difficulty, setDifficulty] = useState("normal");
+  // スピード（slow, normal, quick）を管理するステート
+  const [speed, setSpeed] = useState("normal");
+  // 単語のアニメーション速度（秒数）を管理するステート
+  const [animationDuration, setAnimationDuration] = useState(1);
+
+  // 入力フィールドへの参照を作成し、フォーカス制御に使用
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // カウントダウンの数値を保持するステート（nullの場合はカウントダウンなし）
+  const [countdown, setCountdown] = useState<number | null>(null);
+  // 単語取得のPromiseを保持し、カウントダウン中に非同期処理を開始できるようにする
+  const wordFetchPromise = useRef<Promise<string[]> | null>(null);
+
+  // スピード選択に応じてanimationDuration（アニメーション速度）を更新するuseEffect
+  useEffect(() => {
+    switch (speed) {
+      case "slow":
+        setAnimationDuration(2); // slowの場合は2秒
+        break;
+      case "normal":
+        setAnimationDuration(1); // normalの場合は1秒
+        break;
+      case "quick":
+        setAnimationDuration(0.5); // quickの場合は0.5秒
+        break;
+      default:
+        setAnimationDuration(1); // デフォルトは1秒
+    }
+  }, [speed]); // speedステートが変更されるたびに実行
+
+  /**
+   * ゲームの状態やラウンドが変更されたときに副作用を処理します。
+   * ゲームがアクティブでラウンドが10未満の場合は新しいラウンドを開始し、
+   * 10ラウンドに達した場合はゲームを終了します。
+   */
+  useEffect(() => {
+    if (isGameActive && round < 10) {
+      startRound(); // ゲームがアクティブでラウンドが10未満なら次のラウンドを開始
+    } else if (round >= 10) {
+      endGame(); // ラウンドが10に達したらゲームを終了
+    }
+  }, [isGameActive, round]); // isGameActiveまたはroundステートが変更されるたびに実行
+
+  /**
+   * ゲームの状態に応じて入力欄にフォーカスを当てます。
+   */
+  useEffect(() => {
+    // ゲーム中で、ラウンドが終了していなければ常に入力欄にフォーカスする
+    if (isGameActive && !isRoundOver) {
+      inputRef.current?.focus(); // inputRefが参照する要素にフォーカス
+    }
+  }, [isGameActive, isRoundOver, showWord]); // isGameActive, isRoundOver, showWordステートが変更されるたびに実行
+
+  /**
+   * ゲームを開始し、初期化処理を行います。
+   * 単語リストを取得し、スコアやラウンドをリセットします。
+   */
+  const startGame = () => {
+    setScore(0); // スコアを0にリセット
+    setRound(0); // ラウンドを0にリセット
+    setInputValue(""); // 入力値をクリア
+    setResultMessage(""); // 結果メッセージをクリア
+
+    setCountdown(3); // カウントダウンを3から開始
+    wordFetchPromise.current = getRandomWord(difficulty); // 単語取得を非同期で開始
+
+    // 1秒ごとにカウントダウンを更新するタイマー
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === 1) {
+          clearInterval(timer); // カウントダウンが1になったらタイマーを停止
+          // カウントダウン終了後、単語取得を待ってからゲーム開始
+          wordFetchPromise.current?.then((words) => {
+            setWordList(words); // 取得した単語リストを設定
+            setIsGameActive(true); // ゲームをアクティブにし、useEffect経由でラウンドを開始
+          });
+          return null; // カウントダウン表示を終了
+        }
+        return (prev || 0) - 1; // カウントダウンを1減らす
+      });
+    }, 1000); // 1000ミリ秒（1秒）ごとに実行
+  };
+
+  /**
+   * 新しいラウンドを開始します。
+   * 入力値や結果メッセージをリセットし、新しい単語を表示します。
+   */
+  const startRound = () => {
+    if (wordList.length === 0) return; // 単語リストが空の場合は何もしない
+
+    setInputValue(""); // 入力値をクリア
+    setResultMessage(""); // 結果メッセージをクリア
+    setCurrentWord(wordList[round]); // 現在のラウンドの単語を設定
+    setShowWord(true); // 単語を表示
+    setIsRoundOver(false); // ラウンド終了フラグをfalseに設定
+  };
+
+  /**
+   * ゲームを終了し、最終スコアを表示します。
+   */
+  const endGame = () => {
+    setIsGameActive(false); // ゲームを非アクティブに設定
+    setResultMessage(`Game Over! Your final score is ${score} / 10.`); // 最終スコアを表示
+  };
+
+  /**
+   * 入力欄の変更をハンドルし、リアルタイムで正誤判定を行います。
+   * @param {React.ChangeEvent<HTMLInputElement>} e - input要素のchangeイベントオブジェクト。
+   */
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isRoundOver) return; // ラウンドが終了している場合は何もしない
+
+    const typedValue = e.target.value; // ユーザーが入力した値
+    setInputValue(typedValue); // 入力値を更新
+
+    if (!currentWord) return; // 現在の単語が設定されていない場合は何もしない
+
+    /**
+     * 現在のラウンドを終了し、結果を処理します。
+     * @param {boolean} correct - 正解したかどうかを示す真偽値。
+     */
+    const endRound = (correct: boolean) => {
+      setIsRoundOver(true); // ラウンド終了フラグをtrueに設定
+      if (correct) {
+        setScore((prev) => prev + 1); // スコアを1加算
+        setResultMessage("Correct!"); // 正解メッセージ
+      } else {
+        setResultMessage(`Wrong! The word was \"${currentWord}\".`); // 不正解メッセージと正しい単語
+      }
+      setShowWord(false); // ラウンド終了時に単語を隠す
+      // 1.5秒後に次のラウンドへ
+      setTimeout(() => {
+        setRound((prev) => prev + 1); // ラウンド数を1加算
+      }, 1500); // 1.5秒後に実行
+    };
+
+    // 入力が現在の単語の先頭と一致しているかチェック("abcde".startsWith("abc")ならtrue)
+    if (currentWord.toLowerCase().startsWith(typedValue.toLowerCase())) {
+      // 単語全体が正しく入力された場合
+      if (typedValue.toLowerCase() === currentWord.toLowerCase()) {
+        endRound(true); // 正解としてラウンドを終了
+      }
+    } else {
+      // 入力ミスがあった場合
+      endRound(false); // 不正解としてラウンドを終了
+    }
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    // メインコンテナ: 画面全体をカバーし、要素を中央に配置
+    <div className="flex flex-col items-center justify-baseline min-h-screen bg-gradient-to-b from-[#0B0F19] to-[#1E1E2D] text-white p-4">
+      {/* タイトル */}
+      <h1 className="text-5xl font-bold mb-8 mt-16 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 p-4">
+        動体視力 × タイピング
+      </h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+      {isGameActive ? (
+        // ゲームアクティブ時のUI
+        <>
+          {/* ワード移動エリア */}
+          <div className="relative w-full max-w-3xl h-24 mb-12 overflow-hidden rounded-lg shadow-lg">
+            {showWord && (
+              // アニメーションする単語
+              <div
+                key={round} // ラウンドごとにアニメーションをリセット
+                className="absolute text-4xl font-normal whitespace-nowrap top-[50%] transform -translate-y-1/2 text-white tracking-widest"
+                style={{
+                  animation: `moveRightToLeft ${animationDuration}s linear forwards`,
+                }}
+              >
+                {currentWord}
+              </div>
+            )}
+          </div>
+
+          {/* 入力フィールドと結果メッセージ */}
+          <div className="flex flex-col items-center w-full max-w-md">
+            <input
+              ref={inputRef} // inputRefを割り当ててフォーカス制御を可能にする
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange} // 入力値が変更されたときにhandleInputChangeを実行
+              className="w-full p-4 text-2xl text-center text-white rounded-lg focus:outline-none caret-transparent"
+              placeholder=""
+              // ゲーム中かつラウンドが終了していなければ入力可能
+              disabled={isRoundOver || !isGameActive} // ラウンド終了時またはゲーム非アクティブ時は入力不可
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            {resultMessage && <p className="mt-6 text-3xl font-bold text-cyan-400 animate-pulse">{resultMessage}</p>}
+          </div>
+        </>
+      ) : (
+        // スタート画面（結果があれば表示）
+        <>
+          {countdown !== null ? (
+            // カウントダウン表示
+            <div className="text-9xl font-bold text-blue-400 animate-pulse mt-20">{countdown}</div>
+          ) : (
+            // 難易度とスピード選択
+            <div className="flex justify-center gap-8 mb-8">
+              {/* 難易度選択セクション */}
+              <div className="flex flex-col items-center">
+                <h2 className="text-2xl font-bold mb-4">難易度</h2>
+                <div className="flex flex-col space-y-2 p-2 rounded-lg bg-gray-900 border border-gray-700">
+                  {[ "easy", "normal", "hard"].map((level) => (
+                    <label
+                      key={level}
+                      className={`
+                        relative flex cursor-pointer rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap
+                        focus:outline-none transition-colors duration-200 ease-in-out
+                        ${
+                          difficulty === level
+                            ? "bg-blue-600 text-white shadow" // 選択時のスタイル
+                            : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
+                        } // 非選択時のスタイル
+                      `}
+                    >
+                      <input
+                        type="radio"
+                        name="difficulty"
+                        value={level}
+                        checked={difficulty === level}
+                        onChange={(e) => setDifficulty(e.target.value)}
+                        className="sr-only" // ラジオボタン自体を視覚的に隠す
+                      />
+                      <span className="capitalize">{level}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* スピード選択セクション */}
+              <div className="flex flex-col items-center">
+                <h2 className="text-2xl font-bold mb-4">スピード</h2>
+                <div className="flex flex-col space-y-2 p-2 rounded-lg bg-gray-900 border border-gray-700">
+                  {[ "slow", "normal", "quick"].map((s) => (
+                    <label
+                      key={s}
+                      className={`
+                        relative flex cursor-pointer rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap
+                        focus:outline-none transition-colors duration-200 ease-in-out
+                        ${
+                          speed === s
+                            ? "bg-blue-600 text-white shadow" // 選択時のスタイル
+                            : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
+                        } // 非選択時のスタイル
+                      `}
+                    >
+                      <input
+                        type="radio"
+                        name="speed"
+                        value={s}
+                        checked={speed === s}
+                        onChange={(e) => setSpeed(e.target.value)}
+                        className="sr-only" // ラジオボタン自体を視覚的に隠す
+                      />
+                      <span className="capitalize">{s}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* カウントダウンがnullの場合のみスタートボタンを表示 */}
+          {countdown === null && (
+            // スタートボタン（クリックでゲーム開始）
+            <button
+              onClick={startGame} // クリックでゲーム開始
+              className="px-6 py-3 text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 rounded-full shadow-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 active:scale-100"
+            >
+              Start Game
+            </button>
+          )}
+          {/* 結果メッセージ（ゲーム終了後などに表示） */}
+          {resultMessage && <p className="mt-10 text-4xl font-extrabold text-blue-400">{resultMessage}</p>}
+        </>
+      )}
     </div>
   );
-}
+};
+
+export default TypingGamePage;
