@@ -20,36 +20,23 @@ const getRandomWord = async (level: string) => {
  * ゲームの状態管理、ラウンドの進行、UIのレンダリングを行います。
  */
 const TypingGamePage = () => {
-  // 現在表示されている単語を保持するステート
-  const [currentWord, setCurrentWord] = useState("");
-  // ユーザーが入力した値を保持するステート
-  const [inputValue, setInputValue] = useState("");
-  // ユーザーのスコアを保持するステート
-  const [score, setScore] = useState(0);
-  // 現在のラウンド数を保持するステート
-  const [round, setRound] = useState(0);
-  // ゲームがアクティブ（進行中）かどうかを管理するステート
-  const [isGameActive, setIsGameActive] = useState(false);
-  // 単語が表示されているかどうかを管理するステート
-  const [showWord, setShowWord] = useState(false);
-  // ゲームの結果メッセージ（例: Correct!, Wrong!）を保持するステート
-  const [resultMessage, setResultMessage] = useState("");
-  // APIから取得した単語のリストを保持するステート
-  const [wordList, setWordList] = useState<string[]>([]);
-  // 現在のラウンドが終了したかどうかを管理するステート
-  const [isRoundOver, setIsRoundOver] = useState(false);
-  // 難易度（easy, normal, hard）を管理するステート
-  const [difficulty, setDifficulty] = useState("normal");
-  // スピード（slow, normal, quick）を管理するステート
-  const [speed, setSpeed] = useState("normal");
-  // 単語のアニメーション速度（秒数）を管理するステート
-  const [animationDuration, setAnimationDuration] = useState(1);
+  const [currentWord, setCurrentWord] = useState(""); // 現在表示されている単語
+  const [inputValue, setInputValue] = useState(""); // ユーザーが入力した値
+  const [score, setScore] = useState(0); // ユーザーのスコア
+  const [round, setRound] = useState(0); // 現在のラウンド数
+  const [isGameActive, setIsGameActive] = useState(false); // ゲームがアクティブ（進行中）かどうか
+  const [showWord, setShowWord] = useState(false); // 単語が表示されているかどうか
+  const [resultMessage, setResultMessage] = useState(""); // ゲームの結果メッセージ（例: Correct!, Wrong!）
+  const [wordList, setWordList] = useState<string[]>([]); // APIから取得した単語のリスト
+  const [isRoundOver, setIsRoundOver] = useState(false); // 現在のラウンドが終了したかどうか
+  const [difficulty, setDifficulty] = useState("normal"); // 難易度（easy, normal, hard）
+  const [speed, setSpeed] = useState("normal"); // スピード（slow, normal, quick）
+  const [animationDuration, setAnimationDuration] = useState(1); // 単語のスキャン速度（秒）
+  // カウントダウンの数値を保持するステート（nullの場合はカウントダウンなし）
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   // 入力フィールドへの参照を作成し、フォーカス制御に使用
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // カウントダウンの数値を保持するステート（nullの場合はカウントダウンなし）
-  const [countdown, setCountdown] = useState<number | null>(null);
   // 単語取得のPromiseを保持し、カウントダウン中に非同期処理を開始できるようにする
   const wordFetchPromise = useRef<Promise<string[]> | null>(null);
 
@@ -192,9 +179,7 @@ const TypingGamePage = () => {
     // メインコンテナ: 画面全体をカバーし、要素を中央に配置
     <div className="flex flex-col items-center justify-baseline min-h-screen bg-gradient-to-b from-[#0B0F19] to-[#1E1E2D] text-white p-4">
       {/* タイトル */}
-      <h1 className="text-5xl font-bold mb-8 mt-16 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 p-4">
-        動体視力 × タイピング
-      </h1>
+      <h1 className="text-5xl font-bold mb-8 mt-16 p-4">動体視力 × タイピング</h1>
 
       {isGameActive ? (
         // ゲームアクティブ時のUI
@@ -235,23 +220,23 @@ const TypingGamePage = () => {
         <>
           {countdown !== null ? (
             // カウントダウン表示
-            <div className="text-9xl font-bold text-blue-400 animate-pulse mt-20">{countdown}</div>
+            <div className="text-9xl font-bold text-gray-300 animate-pulse mt-20">{countdown}</div>
           ) : (
             // 難易度とスピード選択
             <div className="flex justify-center gap-8 mb-8">
               {/* 難易度選択セクション */}
               <div className="flex flex-col items-center">
                 <h2 className="text-2xl font-bold mb-4">難易度</h2>
-                <div className="flex flex-col space-y-2 p-2 rounded-lg bg-gray-900 border border-gray-700">
-                  {[ "easy", "normal", "hard"].map((level) => (
+                <div className="flex flex-col space-y-2 p-2">
+                  {["easy", "normal", "hard"].map((level) => (
                     <label
                       key={level}
                       className={`
-                        relative flex cursor-pointer rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap
-                        focus:outline-none transition-colors duration-200 ease-in-out
+                        relative cursor-pointer rounded-md px-12 py-2 text-sm font-medium whitespace-nowrap
+                        focus:outline-none transition-colors duration-200 ease-in-out text-center
                         ${
                           difficulty === level
-                            ? "bg-blue-600 text-white shadow" // 選択時のスタイル
+                            ? "bg-gray-500 text-white shadow" // 選択時のスタイル
                             : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
                         } // 非選択時のスタイル
                       `}
@@ -273,16 +258,16 @@ const TypingGamePage = () => {
               {/* スピード選択セクション */}
               <div className="flex flex-col items-center">
                 <h2 className="text-2xl font-bold mb-4">スピード</h2>
-                <div className="flex flex-col space-y-2 p-2 rounded-lg bg-gray-900 border border-gray-700">
-                  {[ "slow", "normal", "quick"].map((s) => (
+                <div className="flex flex-col space-y-2 p-2">
+                  {["slow", "normal", "quick"].map((s) => (
                     <label
                       key={s}
                       className={`
-                        relative flex cursor-pointer rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap
-                        focus:outline-none transition-colors duration-200 ease-in-out
+                        relative cursor-pointer rounded-md px-12 py-2 text-sm font-medium whitespace-nowrap
+                        focus:outline-none transition-colors duration-200 ease-in-out text-center
                         ${
                           speed === s
-                            ? "bg-blue-600 text-white shadow" // 選択時のスタイル
+                            ? "bg-gray-500 text-white shadow" // 選択時のスタイル
                             : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
                         } // 非選択時のスタイル
                       `}
@@ -308,13 +293,13 @@ const TypingGamePage = () => {
             // スタートボタン（クリックでゲーム開始）
             <button
               onClick={startGame} // クリックでゲーム開始
-              className="px-6 py-3 text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 rounded-full shadow-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 active:scale-100"
+              className="px-6 py-3 text-2xl font-bold bg-gray-500 rounded-full shadow-xl hover:scale-105 active:scale-100"
             >
               Start Game
             </button>
           )}
           {/* 結果メッセージ（ゲーム終了後などに表示） */}
-          {resultMessage && <p className="mt-10 text-4xl font-extrabold text-blue-400">{resultMessage}</p>}
+          {resultMessage && <p className="mt-10 text-4xl font-extrabold text-white">{resultMessage}</p>}
         </>
       )}
     </div>
