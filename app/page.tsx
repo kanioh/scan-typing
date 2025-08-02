@@ -129,7 +129,11 @@ const TypingGamePage = () => {
    */
   const endGame = () => {
     setIsGameActive(false); // ゲームを非アクティブに設定
-    setResultMessage(`Game Over! Your final score is ${score} / 10.`); // 最終スコアを表示
+    if (score === 0) {
+      setResultMessage("残念。1つレベルを落としてもう一度チャレンジしてみよう！"); // 最終スコアを表示
+    } else {
+      setResultMessage(`おめでとう! 正答率は${(score / 10) * 100}%！`); // 最終スコアを表示
+    }
   };
 
   /**
@@ -152,9 +156,9 @@ const TypingGamePage = () => {
       setIsRoundOver(true); // ラウンド終了フラグをtrueに設定
       if (correct) {
         setScore((prev) => prev + 1); // スコアを1加算
-        setResultMessage("Correct!"); // 正解メッセージ
+        setResultMessage("正解!"); // 正解メッセージ
       } else {
-        setResultMessage(`Wrong! The word was \"${currentWord}\".`); // 不正解メッセージと正しい単語
+        setResultMessage(`残念! \"${currentWord}\"だよ`); // 不正解メッセージと正しい単語
       }
       setShowWord(false); // ラウンド終了時に単語を隠す
       // 1.5秒後に次のラウンドへ
@@ -220,7 +224,10 @@ const TypingGamePage = () => {
         <>
           {countdown !== null ? (
             // カウントダウン表示
-            <div className="text-9xl font-bold text-gray-300 animate-pulse mt-20">{countdown}</div>
+            <div className="text-center">
+              <div className="text-9xl font-bold text-gray-300 animate-pulse mt-5 mb-10">{countdown}</div>
+              <p>日本語入力モードをオフにしてください</p>
+            </div>
           ) : (
             // 難易度とスピード選択
             <div className="flex justify-center gap-8 mb-8">
@@ -236,7 +243,7 @@ const TypingGamePage = () => {
                         focus:outline-none transition-colors duration-200 ease-in-out text-center
                         ${
                           difficulty === level
-                            ? "bg-gray-500 text-white shadow" // 選択時のスタイル
+                            ? "bg-gray-600 text-white shadow" // 選択時のスタイル
                             : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
                         } // 非選択時のスタイル
                       `}
@@ -267,7 +274,7 @@ const TypingGamePage = () => {
                         focus:outline-none transition-colors duration-200 ease-in-out text-center
                         ${
                           speed === s
-                            ? "bg-gray-500 text-white shadow" // 選択時のスタイル
+                            ? "bg-gray-600 text-white shadow" // 選択時のスタイル
                             : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
                         } // 非選択時のスタイル
                       `}
@@ -293,13 +300,13 @@ const TypingGamePage = () => {
             // スタートボタン（クリックでゲーム開始）
             <button
               onClick={startGame} // クリックでゲーム開始
-              className="px-6 py-3 text-2xl font-bold bg-gray-500 rounded-full shadow-xl hover:scale-105 active:scale-100"
+              className="px-6 py-3 text-2xl font-bold bg-gray-500 rounded-full shadow-xl transition duration-200 hover:scale-105 active:scale-100"
             >
               Start Game
             </button>
           )}
           {/* 結果メッセージ（ゲーム終了後などに表示） */}
-          {resultMessage && <p className="mt-10 text-4xl font-extrabold text-white">{resultMessage}</p>}
+          {resultMessage && <p className="mt-10 text-2xl font-extrabold text-white">{resultMessage}</p>}
         </>
       )}
     </div>
