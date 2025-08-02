@@ -38,6 +38,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
+        {/* 本番環境のみ解析対象とする */}
         {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
