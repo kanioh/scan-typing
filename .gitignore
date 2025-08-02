@@ -40,12 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# next.js build output
-.next
-
-# Dependency directories
-node_modules/
-
 # vscode individual settings
 .vscode
 
