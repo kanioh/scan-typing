@@ -16,15 +16,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://scan-typing.vercel.app"),
   title: {
-    default: "動体視力×タイピング",
-    template: `%s | 動体視力×タイピング`,
+    default: "動体視力トレーニング×タイピングゲーム",
+    template: `%s | 動体視力トレーニング×タイピングゲーム`,
   },
   description: "動体視力とタイピング力を同時に鍛えられるタイピングゲーム",
   openGraph: {
-    title: "動体視力×タイピング",
+    title: "動体視力トレーニング×タイピングゲーム",
     description: "動体視力とタイピング力を同時に鍛えられるタイピングゲーム",
     url: "https://scan-typing.vercel.app",
-    siteName: "動体視力×タイピング",
+    siteName: "動体視力トレーニング×タイピングゲーム",
   },
 };
 
