@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// supabaseから単語を取得
+//supabaseから単語を取得
 /**
  * APIからランダムな単語のリストを取得します。
  * @async
@@ -158,7 +158,7 @@ const TypingGamePage = () => {
         setScore((prev) => prev + 1); // スコアを1加算
         setResultMessage("正解!"); // 正解メッセージ
       } else {
-        setResultMessage(`残念! \"${currentWord}\"だよ`); // 不正解メッセージと正しい単語
+        setResultMessage(`残念! "${currentWord}"だよ`); // 不正解メッセージと正しい単語
       }
       setShowWord(false); // ラウンド終了時に単語を隠す
       // 1.5秒後に次のラウンドへ
@@ -230,21 +230,23 @@ const TypingGamePage = () => {
             <div className="flex justify-center gap-8 mb-8">
               {/* 難易度選択セクション */}
               <div className="flex flex-col items-center">
-                <h2 className="text-2xl font-medium mb-4">難易度</h2>
+                <h2 className="text-2xl font-medium mb-2">難易度</h2>
                 <div className="flex flex-col space-y-2 p-2">
                   {["easy", "normal", "hard"].map((level) => (
                     <label
                       key={level}
                       className={`
-                        relative cursor-pointer rounded-md px-12 py-2 text-sm font-medium whitespace-nowrap
-                        focus:outline-none transition-colors duration-200 ease-in-out text-center
-                        ${
-                          difficulty === level
-                            ? "bg-gray-600 text-white shadow" // 選択時のスタイル
-                            : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
-                        } // 非選択時のスタイル
+                        relative cursor-pointer rounded-md px-12 py-2 text-sm font-medium whitespace-nowrap group
+                        focus:outline-none transition-transform duration-300 ease-in-out text-center overflow-hidden
+                        ${difficulty === level ? "text-white shadow-lg" : "text-gray-300"}
                       `}
                     >
+                      <div
+                        className={`
+                          absolute inset-0 bg-white bg-cover bg-center transition-all duration-300 ease-in-out group-hover:blur-[100px]
+                          ${difficulty === level ? "blur-[80px]" : "blur-[150px]"}
+                        `}
+                      />
                       <input
                         type="radio"
                         name="difficulty"
@@ -253,7 +255,7 @@ const TypingGamePage = () => {
                         onChange={(e) => setDifficulty(e.target.value)}
                         className="sr-only" // ラジオボタン自体を視覚的に隠す
                       />
-                      <span className="capitalize">{level}</span>
+                      <span className="relative z-10 capitalize">{level}</span>
                     </label>
                   ))}
                 </div>
@@ -261,21 +263,23 @@ const TypingGamePage = () => {
 
               {/* スピード選択セクション */}
               <div className="flex flex-col items-center">
-                <h2 className="text-2xl font-medium mb-4">スピード</h2>
+                <h2 className="text-2xl font-medium mb-2">スピード</h2>
                 <div className="flex flex-col space-y-2 p-2">
                   {["slow", "normal", "quick"].map((s) => (
                     <label
                       key={s}
                       className={`
-                        relative cursor-pointer rounded-md px-12 py-2 text-sm font-medium whitespace-nowrap
-                        focus:outline-none transition-colors duration-200 ease-in-out text-center
-                        ${
-                          speed === s
-                            ? "bg-gray-600 text-white shadow" // 選択時のスタイル
-                            : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
-                        } // 非選択時のスタイル
+                        relative cursor-pointer rounded-md px-12 py-2 text-sm font-medium whitespace-nowrap group
+                        focus:outline-none transition-transform duration-300 ease-in-out text-center overflow-hidden
+                        ${speed === s ? "text-white shadow-lg" : "text-gray-300"}
                       `}
                     >
+                      <div
+                        className={`
+                          absolute inset-0 bg-white bg-cover bg-center transition-all duration-300 ease-in-out group-hover:blur-[100px]
+                          ${speed === s ? "blur-[80px]" : "blur-[150px]"}
+                        `}
+                      />
                       <input
                         type="radio"
                         name="speed"
@@ -284,7 +288,7 @@ const TypingGamePage = () => {
                         onChange={(e) => setSpeed(e.target.value)}
                         className="sr-only" // ラジオボタン自体を視覚的に隠す
                       />
-                      <span className="capitalize">{s}</span>
+                      <span className="relative z-10 capitalize">{s}</span>
                     </label>
                   ))}
                 </div>
@@ -297,9 +301,10 @@ const TypingGamePage = () => {
             // スタートボタン（クリックでゲーム開始）
             <button
               onClick={startGame} // クリックでゲーム開始
-              className="px-6 py-2 text-2xl font-medium rounded-full shadow-xl transition duration-200 hover:scale-105 active:scale-100 border-1"
+              className="relative group overflow-hidden mt-4 px-8 py-3 text-xl font-medium rounded-full shadow-xl transition duration-200"
             >
-              Start Game
+              <div className="absolute inset-0 bg-white bg-cover bg-center transition-all duration-300 ease-in-out blur-[150px] group-hover:blur-[100px]" />
+              <span className="relative z-10">Start Game</span>
             </button>
           )}
           {/* 結果メッセージ（ゲーム終了後などに表示） */}
