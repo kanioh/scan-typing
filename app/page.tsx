@@ -181,15 +181,12 @@ const TypingGamePage = () => {
 
   return (
     // メインコンテナ: 画面全体をカバーし、要素を中央に配置
-    <div className="flex flex-col items-center justify-baseline min-h-screen bg-gradient-to-b from-[#0B0F19] to-[#1E1E2D] text-white p-4">
-      {/* タイトル */}
-      <h1 className="text-5xl font-bold mb-8 mt-16 p-4">動体視力 × タイピング</h1>
-
+    <div className="flex flex-col items-center justify-baseline text-white p-4">
       {isGameActive ? (
         // ゲームアクティブ時のUI
         <>
           {/* ワード移動エリア */}
-          <div className="relative w-full max-w-3xl h-24 mb-12 overflow-hidden rounded-lg shadow-lg">
+          <div className="relative w-full max-w-3xl h-24 mb-12 overflow-hidden">
             {showWord && (
               // アニメーションする単語
               <div
@@ -216,7 +213,7 @@ const TypingGamePage = () => {
               // ゲーム中かつラウンドが終了していなければ入力可能
               disabled={isRoundOver || !isGameActive} // ラウンド終了時またはゲーム非アクティブ時は入力不可
             />
-            {resultMessage && <p className="mt-6 text-3xl font-bold text-cyan-400 animate-pulse">{resultMessage}</p>}
+            {resultMessage && <p className="mt-6 text-3xl font-bold text-white animate-pulse">{resultMessage}</p>}
           </div>
         </>
       ) : (
@@ -233,7 +230,7 @@ const TypingGamePage = () => {
             <div className="flex justify-center gap-8 mb-8">
               {/* 難易度選択セクション */}
               <div className="flex flex-col items-center">
-                <h2 className="text-2xl font-bold mb-4">難易度</h2>
+                <h2 className="text-2xl font-medium mb-4">難易度</h2>
                 <div className="flex flex-col space-y-2 p-2">
                   {["easy", "normal", "hard"].map((level) => (
                     <label
@@ -264,7 +261,7 @@ const TypingGamePage = () => {
 
               {/* スピード選択セクション */}
               <div className="flex flex-col items-center">
-                <h2 className="text-2xl font-bold mb-4">スピード</h2>
+                <h2 className="text-2xl font-medium mb-4">スピード</h2>
                 <div className="flex flex-col space-y-2 p-2">
                   {["slow", "normal", "quick"].map((s) => (
                     <label
@@ -300,7 +297,7 @@ const TypingGamePage = () => {
             // スタートボタン（クリックでゲーム開始）
             <button
               onClick={startGame} // クリックでゲーム開始
-              className="px-6 py-3 text-2xl font-bold bg-gray-500 rounded-full shadow-xl transition duration-200 hover:scale-105 active:scale-100"
+              className="px-6 py-2 text-2xl font-medium rounded-full shadow-xl transition duration-200 hover:scale-105 active:scale-100 border-1"
             >
               Start Game
             </button>
