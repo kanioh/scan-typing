@@ -132,7 +132,7 @@ const TypingGamePage = () => {
     if (score === 0) {
       setResultMessage("残念。1つレベルを落としてもう一度チャレンジしてみよう！"); // 最終スコアを表示
     } else {
-      setResultMessage(`おめでとう! 正答率は${(score / 10) * 100}%！`); // 最終スコアを表示
+      setResultMessage(`おめでとう！ 正答率は${(score / 10) * 100}%！`); // 最終スコアを表示
     }
   };
 
@@ -156,9 +156,9 @@ const TypingGamePage = () => {
       setIsRoundOver(true); // ラウンド終了フラグをtrueに設定
       if (correct) {
         setScore((prev) => prev + 1); // スコアを1加算
-        setResultMessage("正解!"); // 正解メッセージ
+        setResultMessage("正解！"); // 正解メッセージ
       } else {
-        setResultMessage(`残念! "${currentWord}"だよ`); // 不正解メッセージと正しい単語
+        setResultMessage(`残念！"${currentWord}"だよ`); // 不正解メッセージと正しい単語
       }
       setShowWord(false); // ラウンド終了時に単語を隠す
       // 1.5秒後に次のラウンドへ

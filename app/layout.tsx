@@ -1,3 +1,5 @@
+import Footer from "@/app/components/Footer";
+import Header from "@/app/components/Header";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -37,14 +39,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Header />
         {/* タイトル */}
-        <div className="min-h-screen bg-gradient-to-b from-[#262e41] to-[#2d1e11] pt-16">
+        <div className="min-h-screen bg-gradient-to-b from-[#262e41] to-[#2d1e11] pt-24">
           <div className="mb-8 p-4 flex justify-center gap-5">
             <h1 className="ml-15 text-7xl font-bold font-serif ">動体視力</h1>
             <p className="mt-3 text-5xl font-serif">×</p>
             <h1 className="text-7xl font-bold font-serif">タイピング</h1>
           </div>
           {children}
+        </div>
+        <div className="relative -top-20 h-0">
+          <Footer />
         </div>
         {/* 本番環境のみ解析対象とする */}
         {gaId && <GoogleAnalytics gaId={gaId} />}
