@@ -9,7 +9,7 @@ const Header = () => {
           Scan Typing
         </Link>
       </div>
-      <div className="top-4 right-8 fixed">
+      <div className="top-5 right-8 fixed">
         <Image src="/eggplant_white.png" width={30} height={30} alt="" />
       </div>
     </header>
