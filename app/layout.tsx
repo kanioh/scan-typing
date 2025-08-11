@@ -44,7 +44,7 @@ export default function RootLayout({
         <Header />
         {/* タイトル */}
         <div className="flex-1 pt-16 md:pt-24">
-          <div className="mb-4 md:mb-10 p-4 flex flex-col items-center gap-2 md:flex-row md:justify-center md:gap-5">
+          <div className="mb-10 p-4 flex flex-col items-center gap-2 md:flex-row md:justify-center md:gap-5">
             <h1 className="text-5xl font-bold font-serif md:text-7xl">動体視力</h1>
             <p className="text-4xl font-serif md:text-5xl">×</p>
             <h1 className="text-5xl font-bold font-serif md:text-7xl">タイピング</h1>
