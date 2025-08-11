@@ -1,6 +1,7 @@
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -42,17 +43,18 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen bg-gradient-to-b from-[#262e41] to-[#2d1e11]`}
       >
         <Header />
-        {/* タイトル */}
         <div className="flex-1 pt-16 md:pt-24">
-          <div className="mb-4 md:mb-10 p-4 flex flex-col items-center gap-2 md:flex-row md:justify-center md:gap-5">
-            <h1 className="text-5xl font-bold font-serif md:text-7xl">動体視力</h1>
-            <p className="text-4xl font-serif md:text-5xl">×</p>
-            <h1 className="text-5xl font-bold font-serif md:text-7xl">タイピング</h1>
+          {/* タイトル: PCでは3カラム、モバイルでは縦並びで表示 */}
+          <div className="mb-4 md:mb-10 p-4 flex flex-col items-center gap-1 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:w-full md:max-w-5xl mx-auto md:gap-6">
+            <h1 className="text-5xl font-bold font-serif md:text-7xl md:text-right whitespace-nowrap">動体視力</h1>
+            <p className="text-4xl font-serif md:text-5xl md:text-center">×</p>
+            <h1 className="text-5xl font-bold font-serif md:text-7xl whitespace-nowrap">タイピング</h1>
           </div>
           {children}
+          <Analytics />
         </div>
         <Footer />
-        {/* 本番環境のみ解析対象とする */}
+        {/* Google Analytics: 本番環境(NEXT_PUBLIC_GOOGLE_ANALYTICS_IDが設定されている場合)のみ有効化 */}
         {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
