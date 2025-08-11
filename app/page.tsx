@@ -194,7 +194,7 @@ const TypingGamePage = () => {
         // ゲームアクティブ時のUI
         <>
           {/* ワード移動エリア */}
-          <div className="relative w-full max-w-3xl h-24 mb-12 overflow-hidden max-md:mt-24">
+          <div className="relative w-full max-w-3xl h-24 md:mb-12 overflow-hidden">
             {showWord && (
               // アニメーションする単語
               <div
