@@ -40,14 +40,22 @@ const TypingGamePage = () => {
   // 単語取得のPromiseを保持し、カウントダウン中に非同期処理を開始できるようにする
   const wordFetchPromise = useRef<Promise<string[]> | null>(null);
 
+  // モバイル端末かどうかを判定するstate
+  const [isMobile, setIsMobile] = useState(false);
+
+  // ページ読み込み時にモバイル判定を行う
+  useEffect(() => {
+    setIsMobile(/Mobi|Android|iPhone/i.test(navigator.userAgent));
+  }, []);
+
   // スピード選択に応じてanimationDuration（アニメーション速度）を更新するuseEffect
   useEffect(() => {
     switch (speed) {
       case "slow":
-        setAnimationDuration(2); // slowの場合は2秒
+        setAnimationDuration(isMobile ? 1 : 2); // slowの場合は2秒
         break;
       case "normal":
-        setAnimationDuration(1); // normalの場合は1秒
+        setAnimationDuration(isMobile ? 0.8 : 1); // normalの場合は1秒
         break;
       case "quick":
         setAnimationDuration(0.5); // quickの場合は0.5秒
@@ -55,7 +63,7 @@ const TypingGamePage = () => {
       default:
         setAnimationDuration(1); // デフォルトは1秒
     }
-  }, [speed]); // speedステートが変更されるたびに実行
+  }, [speed, isMobile]); // speedステートが変更されるたびに実行
 
   /**
    * ゲームの状態やラウンドが変更されたときに副作用を処理します。
@@ -209,7 +217,7 @@ const TypingGamePage = () => {
               value={inputValue}
               onChange={handleInputChange} // 入力値が変更されたときにhandleInputChangeを実行
               className="w-full p-4 text-2xl text-center text-white rounded-lg focus:outline-none caret-transparent"
-              placeholder=""
+              placeholder={isMobile ? "ここをタップして入力" : ""}
               // ゲーム中かつラウンドが終了していなければ入力可能
               disabled={isRoundOver || !isGameActive} // ラウンド終了時またはゲーム非アクティブ時は入力不可
             />
@@ -227,7 +235,7 @@ const TypingGamePage = () => {
             </div>
           ) : (
             // 難易度とスピード選択
-            <div className="flex justify-center gap-8 mb-8">
+            <div className="flex justify-center gap-3 md:gap-8 mb-8">
               {/* 難易度選択セクション */}
               <div className="flex flex-col items-center">
                 <h2 className="text-2xl font-medium mb-2">難易度</h2>

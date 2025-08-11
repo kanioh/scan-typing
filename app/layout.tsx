@@ -38,20 +38,20 @@ export default function RootLayout({
   const gaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen bg-gradient-to-b from-[#262e41] to-[#2d1e11]`}
+      >
         <Header />
         {/* タイトル */}
-        <div className="min-h-screen bg-gradient-to-b from-[#262e41] to-[#2d1e11] pt-24">
-          <div className="mb-8 p-4 flex justify-center gap-5">
-            <h1 className="ml-15 text-7xl font-bold font-serif ">動体視力</h1>
-            <p className="mt-3 text-5xl font-serif">×</p>
-            <h1 className="text-7xl font-bold font-serif">タイピング</h1>
+        <div className="flex-1 pt-24">
+          <div className="mb-10 p-4 flex flex-col items-center gap-2 md:flex-row md:justify-center md:gap-5">
+            <h1 className="text-5xl font-bold font-serif md:text-7xl">動体視力</h1>
+            <p className="text-4xl font-serif md:text-5xl">×</p>
+            <h1 className="text-5xl font-bold font-serif md:text-7xl">タイピング</h1>
           </div>
           {children}
         </div>
-        <div className="relative -top-20 h-0">
-          <Footer />
-        </div>
+        <Footer />
         {/* 本番環境のみ解析対象とする */}
         {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
